@@ -6,11 +6,19 @@ import { useThemeStore } from '../lib/theme';
 
 export function TaskForm() {
   const [url, setUrl] = useState('');
-  const [selector, setSelector] = useState('');
+  const [selectors, setSelectors] = useState<string[]>(['']);
   const [maxResults, setMaxResults] = useState(10);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addTask, updateTask } = useScrapingStore();
   const isDarkMode = useThemeStore(state => state.isDarkMode);
+
+  const handleSelectorChange = (index: number, value: string) => {
+    const updatedSelectors = [...selectors];
+    updatedSelectors[index] = value;
+    setSelectors(updatedSelectors);
+  };
+
+  const addSelectorField = () => setSelectors([...selectors, '']);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +28,7 @@ export function TaskForm() {
     const task = {
       id: taskId,
       url,
-      selector,
+      selectors,
       maxResults,
       status: 'running' as const,
       results: [],
@@ -31,7 +39,7 @@ export function TaskForm() {
     addTask(task);
 
     try {
-      const results = await scrapeWebsite(url, selector, maxResults);
+      const results = await scrapeWebsite(url, selectors, maxResults);
       updateTask(taskId, {
         status: 'completed',
         results,
@@ -39,7 +47,7 @@ export function TaskForm() {
       });
       
       setUrl('');
-      setSelector('');
+      setSelectors(['']);
       setMaxResults(10);
     } catch (error) {
       updateTask(taskId, {
@@ -89,20 +97,30 @@ export function TaskForm() {
           <label className={`block text-sm font-medium mb-1 ${
             isDarkMode ? 'text-gray-300' : 'text-gray-700'
           }`}>
-            CSS Selector
+            CSS Selectors
           </label>
-          <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${iconClasses}`} />
-            <input
-              type="text"
-              required
-              value={selector}
-              onChange={(e) => setSelector(e.target.value)}
-              className={`${inputClasses} pl-10`}
-              placeholder=".product-title"
-              disabled={isSubmitting}
-            />
-          </div>
+          {selectors.map((selector, index) => (
+            <div key={index} className="relative mb-2">
+              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${iconClasses}`} />
+              <input
+                type="text"
+                required
+                value={selector}
+                onChange={(e) => handleSelectorChange(index, e.target.value)}
+                className={`${inputClasses} pl-10`}
+                placeholder=".product-title"
+                disabled={isSubmitting}
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addSelectorField}
+            className="text-sm text-blue-500 hover:underline"
+            disabled={isSubmitting}
+          >
+            Add another selector
+          </button>
         </div>
 
         <div>

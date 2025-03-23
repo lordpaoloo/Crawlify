@@ -9,6 +9,7 @@ interface ScrapingStore {
   updateTask: (taskId: string, updates: Partial<ScrapingTask>) => void;
   setCurrentTask: (task: ScrapingTask | null) => void;
   loadTasksFromDB: () => Promise<void>;
+  deleteTask: (taskId: string) => void;
 }
 
 export const useScrapingStore = create<ScrapingStore>((set) => ({
@@ -31,5 +32,11 @@ export const useScrapingStore = create<ScrapingStore>((set) => ({
   loadTasksFromDB: async () => {
     const tasks = await dbOperations.getAllTasks();
     set({ tasks });
+  },
+  deleteTask: async (taskId) => {
+    await dbOperations.deleteTask(taskId);
+    set((state) => ({
+      tasks: state.tasks.filter((task) => task.id !== taskId),
+    }));
   },
 }));

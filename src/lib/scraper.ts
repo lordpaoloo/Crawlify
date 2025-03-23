@@ -1,8 +1,9 @@
 interface ScrapeResult {
   text: string;
-  href?: string;
-  src?: string;
-  alt?: string;
+}
+
+interface GroupedScrapeResults {
+  [selector: string]: ScrapeResult[];
 }
 
 export class ScraperError extends Error {
@@ -12,9 +13,16 @@ export class ScraperError extends Error {
   }
 }
 
-export async function scrapeWebsite(url: string, selector: string, maxResults: number): Promise<ScrapeResult[]> {
+export async function scrapeWebsite(
+  url: string,
+  selectors: string[],
+  maxResults: number
+): Promise<GroupedScrapeResults> {
   try {
-    // Use a CORS proxy to fetch the content
+    if (!selectors || selectors.length === 0) {
+      throw new ScraperError('No selectors provided');
+    }
+
     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
     const response = await fetch(proxyUrl);
     
@@ -26,18 +34,30 @@ export async function scrapeWebsite(url: string, selector: string, maxResults: n
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     
-    const elements = Array.from(doc.querySelectorAll(selector));
-    const results: ScrapeResult[] = elements
-      .slice(0, maxResults)
-      .map(element => ({
-        text: element.textContent?.trim() || '',
-        href: element instanceof HTMLAnchorElement ? element.href : undefined,
-        src: element instanceof HTMLImageElement ? element.src : undefined,
-        alt: element instanceof HTMLImageElement ? element.alt : undefined,
-      }));
+    const results: GroupedScrapeResults = {};
+    
+    // Process each selector independently
+    for (const selector of selectors) {
+      results[selector] = [];
+      try {
+        const elements = Array.from(doc.querySelectorAll(selector));
+        
+        for (const element of elements) {
+          if (results[selector].length >= maxResults) break;
 
-    if (results.length === 0) {
-      throw new ScraperError('No elements found matching the selector');
+          const text = element.textContent?.trim() || '';
+          if (text) {
+            results[selector].push({ text });
+          }
+        }
+      } catch (selectorError) {
+        console.warn(`Error processing selector "${selector}":`, selectorError);
+      }
+    }
+
+    const totalResults = Object.values(results).reduce((sum, arr) => sum + arr.length, 0);
+    if (totalResults === 0) {
+      throw new ScraperError('No elements found matching any of the selectors');
     }
 
     return results;

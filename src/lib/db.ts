@@ -3,16 +3,20 @@ import { openDB } from 'idb';
 export interface ScrapingTask {
   id: string;
   url: string;
-  selector: string;
+  selectors: string[];
   maxResults: number;
   status: 'pending' | 'running' | 'completed' | 'failed';
-  results: any[];
+  results: {
+    [selector: string]: Array<{
+      text: string;
+    }>;
+  };
   createdAt: Date;
   updatedAt: Date;
   error?: string;
 }
 
-const DB_NAME = 'web-scraper-db';
+const DB_NAME = 'crawlify-db';
 const STORE_NAME = 'scraping-tasks';
 
 export const initDB = async () => {
@@ -45,5 +49,10 @@ export const dbOperations = {
     if (task) {
       await db.put(STORE_NAME, { ...task, ...updates });
     }
+  },
+
+  async deleteTask(taskId: string) {
+    const db = await initDB();
+    await db.delete(STORE_NAME, taskId);
   }
 };
