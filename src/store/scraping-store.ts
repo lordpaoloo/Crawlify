@@ -4,10 +4,12 @@ import { ScrapingTask, dbOperations } from '../lib/db';
 interface ScrapingStore {
   tasks: ScrapingTask[];
   currentTask: ScrapingTask | null;
+  editingTask: ScrapingTask | null; 
   setTasks: (tasks: ScrapingTask[]) => void;
   addTask: (task: ScrapingTask) => void;
   updateTask: (taskId: string, updates: Partial<ScrapingTask>) => void;
   setCurrentTask: (task: ScrapingTask | null) => void;
+  setEditingTask: (task: ScrapingTask | null) => void; 
   loadTasksFromDB: () => Promise<void>;
   deleteTask: (taskId: string) => void;
 }
@@ -15,6 +17,7 @@ interface ScrapingStore {
 export const useScrapingStore = create<ScrapingStore>((set) => ({
   tasks: [],
   currentTask: null,
+  editingTask: null, 
   setTasks: (tasks) => set({ tasks }),
   addTask: async (task) => {
     await dbOperations.addTask(task);
@@ -29,6 +32,7 @@ export const useScrapingStore = create<ScrapingStore>((set) => ({
     }));
   },
   setCurrentTask: (task) => set({ currentTask: task }),
+  setEditingTask: (task) => set({ editingTask: task }), 
   loadTasksFromDB: async () => {
     const tasks = await dbOperations.getAllTasks();
     set({ tasks });
@@ -39,4 +43,4 @@ export const useScrapingStore = create<ScrapingStore>((set) => ({
       tasks: state.tasks.filter((task) => task.id !== taskId),
     }));
   },
-}));
+}))

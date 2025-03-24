@@ -1,7 +1,9 @@
 import React from 'react';
 import { Coffee, Github, Instagram, Linkedin, Globe, MessageCircle } from 'lucide-react';
+import { useThemeStore } from '../lib/theme';
 
 export function FloatingCoffee() {
+  const isDarkMode = useThemeStore(state => state.isDarkMode);
   const links = [
     {
       icon: <Github className="h-6 w-6" />,
@@ -39,17 +41,17 @@ export function FloatingCoffee() {
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${link.color} p-2 rounded-full text-white shadow-lg 
+          className={`${link.color} p-2 rounded-full ${isDarkMode ? 'text-white' : 'text-gray-800'} shadow-lg 
             transform transition-all duration-200 hover:scale-110 hover:shadow-xl`}
         >
           {link.icon}
         </a>
       ))}
       <a
-        href="https://www.buymeacoffee.com/yourname"
+        href="https://ko-fi.com/yousefmohamad"
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-black px-4 py-2 rounded-lg shadow-lg 
+        className="bg-[#FF6433] hover:bg-[#fa4e0a]/90 text-black px-4 py-2 rounded-lg shadow-lg 
           transform transition-all duration-200 hover:scale-105 hover:shadow-xl"
       >
         <div className="flex items-center">

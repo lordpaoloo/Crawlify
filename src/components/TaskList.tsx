@@ -1,12 +1,12 @@
 import React from 'react';
-import { Download, Loader2, RefreshCw, AlertCircle, Trash2 } from 'lucide-react';
+import { Download, Loader2, RefreshCw, AlertCircle, Trash2, Edit } from 'lucide-react';
 import { useScrapingStore } from '../store/scraping-store';
 import { useThemeStore } from '../lib/theme';
 import { downloadCSV } from '../lib/export';
 import { scrapeWebsite } from '../lib/scraper';
 
 export function TaskList() {
-  const { tasks, updateTask, deleteTask } = useScrapingStore();
+  const { tasks, updateTask, deleteTask, setEditingTask } = useScrapingStore();
   const isDarkMode = useThemeStore(state => state.isDarkMode);
 
   const handleRescrape = async (taskId: string) => {
@@ -29,6 +29,15 @@ export function TaskList() {
         error: error instanceof Error ? error.message : 'Unknown error occurred',
         updatedAt: new Date(),
       });
+    }
+  };
+
+  const handleEdit = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      setEditingTask(task);
+      // Scroll to the form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -127,6 +136,13 @@ export function TaskList() {
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Delete
+            </button>
+            <button
+              onClick={() => handleEdit(task.id)}
+              className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              Edit
             </button>
             {task.status === 'completed' && (
               <button
