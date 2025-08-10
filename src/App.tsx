@@ -4,7 +4,6 @@ import { TaskForm } from './components/TaskForm';
 import { TaskList } from './components/TaskList';
 import { ThemeToggle } from './components/ThemeToggle';
 import { FloatingCoffee } from './components/FloatingCoffee';
-import { AuthWrapper } from './components/auth/AuthWrapper';
 import { useScrapingStore } from './store/scraping-store';
 import { useThemeStore } from './lib/theme';
 
@@ -18,7 +17,9 @@ function App() {
   }, [loadTasksFromDB]);
 
   return (
-    <AuthWrapper>
+    <div className={`min-h-screen transition-colors duration-200 ${
+      isDarkMode ? 'bg-[#0a0a0a] text-white' : 'bg-[#fcfbf7] text-slate-900'
+    }`}>
       <FloatingCoffee />
       <ThemeToggle />
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -41,7 +42,7 @@ function App() {
           </div>
         </div>
       </div>
-    </AuthWrapper>
+    </div>
   );
 }
 
